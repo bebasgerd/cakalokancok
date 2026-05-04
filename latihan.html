@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portal Kelulusan 2026 - SMKN 1 Semparuk</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --primary: #00f2fe; 
+            --secondary: #4facfe; 
+            --dark: #050508; 
+            --glass: rgba(255, 255, 255, 0.07);
+            --success: #2ecc71;
+            --error: #ff4757;
+        }
+        
+        /* FIX: Stabilitas Layar HP */
+        html, body { 
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; 
+            font-family: 'Poppins', sans-serif; 
+            background: var(--dark);
+            color: white; 
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* --- BACKGROUND LANGIT BINTANG --- */
+        .stars-container {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+        }
+
+        .star {
+            position: absolute; background: white; border-radius: 50%; opacity: 0.5;
+            animation: twinkle var(--duration) infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.5); opacity: 1; }
+        }
+
+        .shooting-star {
+            position: absolute; width: 4px; height: 4px; background: #fff;
+            border-radius: 50%; box-shadow: 0 0 20px rgba(255,255,255,1);
+            animation: animate-star 3s linear infinite;
+        }
+
+        @keyframes animate-star {
+            0% { transform: rotate(315deg) translateX(0); opacity: 1; }
+            100% { transform: rotate(315deg) translateX(-1000px); opacity: 0; }
+        }
+
+        /* --- ASTRONOT --- */
+        .astronaut {
+            position: absolute; width: 80px; z-index: 1;
+            filter: drop-shadow(0 0 15px var(--secondary));
+            animation: orbitAstronaut 25s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes orbitAstronaut {
+            from { transform: rotate(0deg) translateX(150px) rotate(0deg); }
+            to   { transform: rotate(360deg) translateX(150px) rotate(-360deg); }
+        }
+
+        /* --- CONTAINER UTAMA --- */
+        .container { 
+            background: var(--glass);
+            backdrop-filter: blur(25px); 
+            padding: 2.5rem 2rem; 
+            border-radius: 30px; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            width: 85%; max-width: 380px; 
+            text-align: center; 
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            position: relative; z-index: 10;
+        }
+
+        .logo-sekolah { width: 80px; margin-bottom: 15px; filter: drop-shadow(0 0 15px var(--primary)); }
+        h1 { background: linear-gradient(to bottom, #fff, var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 3.5rem; margin: 0; font-weight: 900; letter-spacing: -3px; }
+        .subtitle { font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 2rem; color: var(--secondary); font-weight: 600; }
+
+        /* --- COUNTDOWN --- */
+        .countdown-container {
+            margin-bottom: 1.5rem; background: rgba(0, 0, 0, 0.4);
+            padding: 15px; border-radius: 20px; border: 1px dashed var(--primary);
+        }
+        .timer { display: flex; justify-content: space-around; }
+        .time-box { display: flex; flex-direction: column; }
+        .time-box span:first-child { font-size: 1.2rem; font-weight: 800; color: var(--primary); }
+        .time-box span:last-child { font-size: 0.5rem; text-transform: uppercase; opacity: 0.6; }
+        .lock-msg { color: var(--error); font-size: 0.7rem; margin-top: 10px; font-weight: 600; }
+
+        /* --- FORM & INPUT --- */
+        #inputArea { display: none; }
+        input { width: 100%; padding: 15px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: white; text-align: center; margin-bottom: 10px; box-sizing: border-box; outline: none; }
+        input:focus { border-color: var(--primary); }
+        button { width: 100%; padding: 15px; border-radius: 15px; border: none; background: linear-gradient(45deg, #4facfe, #00f2fe); color: #050508; font-weight: 800; cursor: pointer; text-transform: uppercase; }
+
+        #result { margin-top: 1.5rem; display: none; padding: 20px; border-radius: 20px; background: rgba(0,0,0,0.3); }
+        .btn-download { display: inline-block; margin-top: 15px; padding: 12px 25px; background: var(--success); color: white; text-decoration: none; border-radius: 12px; font-weight: 700; }
+        
+        #loader { display: none; width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 10px; margin: 20px 0; overflow: hidden; }
+        #loader-bar { width: 0%; height: 100%; background: var(--primary); transition: width 0.5s ease; }
+        
+        #audioStatus { position: fixed; bottom: 15px; right: 15px; font-size: 0.6rem; color: var(--primary); opacity: 0.5; font-weight: 800; }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="interstellar.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="audioStatus">READY</div>
+    <div class="stars-container" id="starField"></div>
+
+    <svg class="astronaut" viewBox="0 0 512 512">
+        <path fill="#e0e0e0" d="M377 105c-27-27-71-27-98 0l-15 15c-27 27-27 71 0 98l15 15c27 27 71 27 98 0l15-15c27-27 27-71 0-98l-15-15z"/>
+        <circle cx="256" cy="256" r="100" fill="#ffffff" />
+        <path d="M210 230a10 10 0 1 1 20 0 10 10 0 1 1-20 0zm72 0a10 10 0 1 1 20 0 10 10 0 1 1-20 0z" fill="#333"/>
+    </svg>
+
+    <div class="container animate__animated animate__zoomIn">
+        <img src="logo.png" alt="Logo" class="logo-sekolah">
+        <h1>2026</h1>
+        <p class="subtitle">Portal Kelulusan</p>
+
+        <div id="countdownArea" class="countdown-container">
+            <div class="timer">
+                <div class="time-box"><span id="days">00</span><span>Hari</span></div>
+                <div class="time-box"><span id="hours">00</span><span>Jam</span></div>
+                <div class="time-box"><span id="minutes">00</span><span>Menit</span></div>
+                <div class="time-box"><span id="seconds">00</span><span>Detik</span></div>
+            </div>
+            <p class="lock-msg">DIBUKA 4 MEI 2026 - 07:00 WIB</p>
+        </div>
+
+        <div id="inputArea">
+            <input type="number" id="nisnInput" placeholder="Ketik NISN Kamu..." pattern="\d*">
+            <button onclick="cekStatus()" id="btnCek">Buka Masa Depan</button>
+        </div>
+
+        <div id="loader"><div id="loader-bar"></div></div>
+        <div id="result">
+            <div id="statusMsg"></div>
+            <div id="downloadArea"></div>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('bgMusic');
+        let audioStarted = false;
+
+        // FUNGSI AUDIO SENSITIF
+        function playAudio() {
+            if (!audioStarted) {
+                audio.volume = 0.3;
+                audio.play().then(() => {
+                    audioStarted = true;
+                    let vol = 0.3;
+                    const fade = setInterval(() => {
+                        if (vol < 1.0) {
+                            vol += 0.05;
+                            audio.volume = Math.min(vol, 1.0);
+                        } else { clearInterval(fade); }
+                    }, 100);
+                    document.getElementById('audioStatus').innerText = "🔊 AUDIO ACTIVE";
+                }).catch(() => {});
+            }
+        }
+
+        // Trigger Audio (Mouse, Touch, Scroll, Click)
+        ['mousemove', 'touchstart', 'mousedown', 'keydown', 'scroll'].forEach(e => {
+            window.addEventListener(e, playAudio, { once: true });
+        });
+
+        // BINTANG & METEOR
+        const field = document.getElementById('starField');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            const size = Math.random() * 2 + 'px';
+            star.style.width = size; star.style.height = size;
+            star.style.top = Math.random() * 100 + '%';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.setProperty('--duration', Math.random() * 3 + 2 + 's');
+            field.appendChild(star);
+        }
+
+        setInterval(() => {
+            const sStar = document.createElement('div');
+            sStar.className = 'shooting-star';
+            sStar.style.top = Math.random() * 50 + '%';
+            sStar.style.left = Math.random() * 100 + '%';
+            field.appendChild(sStar);
+            setTimeout(() => sStar.remove(), 3000);
+        }, 3000);
+
+        // LOGIKA COUNTDOWN
+        const targetDate = new Date('May 4, 2026 07:00:00').getTime();
+        function updateTimer() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+            if (distance < 0) {
+                document.getElementById('inputArea').style.display = "block";
+                document.getElementById('countdownArea').style.display = "none";
+                return;
+            }
+            document.getElementById('days').innerText = Math.floor(distance / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            document.getElementById('hours').innerText = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
+            document.getElementById('minutes').innerText = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
+            document.getElementById('seconds').innerText = Math.floor((distance % (1000 * 60)) / 1000).toString().padStart(2, '0');
+        }
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // CEK STATUS
+        const daftarTidakLulus = ["0076372612", "0065736875", "0069244360", "0081064769", "0065373754", "0088122839", "0075031441", "0061383661", "0085543500", "0086366856"];
+
+        async function cekStatus() {
+            playAudio();
+            const input = document.getElementById('nisnInput').value.trim();
+            const resBox = document.getElementById('result');
+            const msg = document.getElementById('statusMsg');
+            const dl = document.getElementById('downloadArea');
+            const lBar = document.getElementById('loader-bar');
+            const btn = document.getElementById('btnCek');
+
+            if (!input) { alert("NISN kosong!"); return; }
+
+            btn.disabled = true;
+            document.getElementById('loader').style.display = "block";
+            lBar.style.width = "100%";
+
+            try {
+                const response = await fetch('daftar.txt?t=' + new Date().getTime());
+                const data = await response.text();
+                const listFile = data.split(/\r?\n/).map(f => f.trim()).filter(f => f !== "");
+
+                setTimeout(() => {
+                    document.getElementById('loader').style.display = "none";
+                    btn.disabled = false;
+                    resBox.style.display = "block";
+                    resBox.className = "animate__animated animate__backInUp";
+
+                    if (daftarTidakLulus.includes(input)) {
+                        msg.innerHTML = `<h2 style="color:var(--error)">PEMBERITAHUAN</h2><p>Data Anda perlu verifikasi langsung. Silakan hubungi Wali Kelas.</p>`;
+                        dl.innerHTML = "";
+                    } else {
+                        const fileKetemu = listFile.find(f => f.startsWith(input));
+                        if (fileKetemu) {
+                            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+                            const nama = fileKetemu.replace(input, "").replace(/\.[^/.]+$/, "").trim();
+                            msg.innerHTML = `<h2 style="color:var(--primary)">SELAMAT!</h2><p><b>${nama}</b></p><p>Kamu dinyatakan LULUS!</p>`;
+                            dl.innerHTML = `<a href="SKL 2026/${encodeURIComponent(fileKetemu)}" class="btn-download" download>Download SKL (PDF)</a>`;
+                        } else {
+                            msg.innerHTML = `<h2>UPS!</h2><p>NISN tidak ditemukan.</p>`;
+                            dl.innerHTML = "";
+                        }
+                    }
+                }, 1000);
+            } catch (e) { alert("Gagal koneksi database!"); btn.disabled = false; }
+        }
+    </script>
+</body>
+</html>
